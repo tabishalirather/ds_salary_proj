@@ -29,6 +29,7 @@ def get_jobs(keyword, num_jobs, verbose, path, slp_time):
     driver.set_window_size(1120, 1000)
 
     url = "https://www.glassdoor.com/Job/jobs.htm?suggestCount=0&suggestChosen=false&clickSource=searchBtn&typedKeyword=" + keyword + "&sc.keyword=" + keyword + "&locT=&locId=&jobType="
+    url = "https://www.glassdoor.com/Job/australia-data-scientist-jobs-SRCH_IL.0,9_IN16_KO10,24.htm?clickSource=searchBox"
     # url = 'https://www.glassdoor.com/Job/jobs.htm?sc.keyword="' + keyword + '"&locT=C&locId=1147401&locKeyword=San%20Francisco,%20CA&jobType=all&fromAge=-1&minSalary=0&includeNoSalaryJobs=true&radius=100&cityId=-1&minRating=0.0&industryId=-1&sgocId=-1&seniorityType=all&companyId=-1&employerSizes=0&applicationType=0&remoteWorkType=0'
     driver.get(url)
     jobs = []
@@ -51,7 +52,7 @@ def get_jobs(keyword, num_jobs, verbose, path, slp_time):
         element.click()
         try:
             # close_button = driver.find_element_by_class_name("SVGInline modal_closeIcon")
-            time.sleep(5)
+            time.sleep(1)
             driver.find_element_by_css_selector('[alt="Close"]').click()
             # close_button.click()
             print('x out worked')
@@ -68,8 +69,11 @@ def get_jobs(keyword, num_jobs, verbose, path, slp_time):
 
             print("Progress: {}".format("" + str(len(jobs)) + "/" + str(num_jobs)))
             if len(jobs) >= num_jobs:
+                print("breaking")
                 break
+            
             try:
+                print("not breaking")
                 job_button.click()  # You might
                 time.sleep(1)
                 collected_successfully = False
@@ -77,21 +81,34 @@ def get_jobs(keyword, num_jobs, verbose, path, slp_time):
                 continue
             while not collected_successfully:
                 try:
-                    company_name = driver.find_element_by_xpath('.//div[@class="employerName"]').text
-                    location = driver.find_element_by_xpath('.//div[@class="location"]').text
-                    job_title = driver.find_element_by_xpath('.//div[contains(@class, "title")]').text
-                    job_description = driver.find_element_by_xpath('.//div[@class="jobDescriptionContent desc"]').text
+                    job_title = driver.find_element_by_xpath('//*[@id="MainCol"]/div[1]/ul/li[1]/div[2]/a/span').text
+                    print(f"Role is: {job_title}")
+                    
+                    company_name_all = driver.find_elements_by_xpath('//*[@id="MainCol"]/div[1]/ul/li[1]/div[2]/div[1]/a/span')
+                    company_name = company_name_all[0].text
+                    print(f"company_name is: {company_name}")
+                    
+                    job_description = driver.find_elements_by_xpath('//*[@id="MainCol"]/div[1]/ul/li[1]/div[2]/button/span').text
+                    print(f"job description: {job_description}")
+                    
+                    location_all = driver.find_elements_by_xpath('//*[@id="MainCol"]/div[1]/ul/li[1]/div[2]/div[2]/span')
+                    location = location_all[0].text
+                    print(f"location is: {location}")
+                    
                     collected_successfully = True
                 except:
+                    print("Try failed")
                     time.sleep(5)
 
             try:
-                salary_estimate = driver.find_element_by_xpath('.//span[@class="gray salary"]').text
+                salary_estimate = driver.find_element_by_xpath('//*[@id="MainCol"]/div[1]/ul/li[1]/div[2]/div[3]/div[1]/span').text
+                print(f'salary_estimate: {salary_estimate}')
             except NoSuchElementException:
-                salary_estimate = -1  # You need to set a "not found value. It's important."
+                salary_estimate = -1  # You need to  set a "not found value. It's important."
 
             try:
-                rating = driver.find_element_by_xpath('.//span[@class="rating"]').text
+                rating = driver.find_element_by_xpath('//*[@id="JDCol"]/div/article/div/div[1]/div/div/div[1]/div[3]/div[1]/div[1]/div/span').text
+                print(f'Rating: {rating}')
             except NoSuchElementException:
                 rating = -1  # You need to set a "not found value. It's important."
 
@@ -197,6 +214,7 @@ def get_jobs(keyword, num_jobs, verbose, path, slp_time):
                          "Sector": sector,
                          "Revenue": revenue,
                          "Competitors": competitors})
+            print(jobs)
             # add job to jobs
 
         # Clicking on the "next page" button
@@ -214,6 +232,7 @@ def get_jobs(keyword, num_jobs, verbose, path, slp_time):
     return pd.DataFrame(jobs).reset_index()  # This line converts the dictionary object into a pandas DataFrame.
 
 
-path = "C:/Users/tabis/OneDrive - Swinburne University/Semester I - 2023/Easter break_Project/ds_salary_proj/chromedriver_win32/chromedriver.exe"
-df = get_jobs('data scientist', 15, False, path, 4)
+path = r"C:/Users/tabis/OneDrive - Swinburne University/Semester I - 2023/Easter break_Project/ds_salary_proj/Resources/chromedriver_win32/chromedriver.exe"
+df = get_jobs("data scientist", 1, False, path, 5)
+print(df)
 df.to_csv('Uncleaned_DS_jobs.csv', index=False)
