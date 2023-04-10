@@ -8,9 +8,7 @@ Created on Fri Apr  7 21:18:13 2023
 import pandas as pd
 import csv
 
-df = pd.read_csv('glassdoor_jobs.csv')
-# df = pd.read_csv('Uncleaned_DS_jobs.csv')
-# print(df)
+df = pd.read_csv(r"C:\Users\tabis\OneDrive - Swinburne University\Semester I - 2023\Easter break_Project\ds_salary_proj\Resources\glassdoor_jobs.csv")
 #salary_parsing
 #company_name
 #state field
